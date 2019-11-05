@@ -4,6 +4,9 @@
 (def possible-vals #{1 2 3 4 5 6 7 8 9})
 (defn create-sudoku [] (vec (for [i (range 9)] (vec (for [j (range 9)] nil)))))
 (defn map-sudoku [f sk] (vec (map #(vec (map f %)) sk)))
+(defn sudoku->list [sk] (reduce concat sk))
+(defn reduce-sudoku [f val sk] (reduce f val (sudoku->list sk)))
+(defn solved? [sk] (reduce-sudoku #(and %1 (= 1 (count %2))) true (options sk)))
 (defn map-indexed-sudoku [f sk]
   (vec (map-indexed
         (fn [r rv]
@@ -36,13 +39,6 @@
 (defn options [sk]
   (map-indexed-sudoku (fn [r c v] (options-cell sk r c v)) sk))
 
-(defn complete-sudoku [sk]
-  (loop [orig sk]
-    (let [updt (complete-sudoku-once orig)]
-      (if (= orig updt)
-        orig
-        (recur updt)))))
-
 (defn complete-sudoku-once [sk]
   (let [sk-opts (options sk)]
     (map-indexed-sudoku
@@ -53,4 +49,10 @@
            v)))
      sk)))
 
+(defn complete-sudoku [sk]
+  (loop [orig sk]
+    (let [updt (complete-sudoku-once orig)]
+      (if (= orig updt)
+        orig
+        (recur updt)))))
 
