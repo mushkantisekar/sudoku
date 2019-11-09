@@ -62,14 +62,15 @@
        (filter #(not (or (empty? %) (nil? %))))))
 
 (defn solve-open-sudoku [sk random?]
-  (let [opts    (options sk)
-        sel-fn  (if random? rand-nth first)]
-    (->> (lazy-seq opts)
+  (let [opts      (options sk)
+        selec-fn  (if random?
+                    (fn [coll] (if (empty? coll) nil (rand-nth coll)))
+                    first)]
+    (->> opts
          (map-indexed-sudoku (fn [r c v] [r c (count v)])) ; Take only cells with
          (reduce concat)                                   ; multiple options
          (filter #(> (% 2) 1))                             ; available
-         ;; (sel-fn)
-         (first)
+         selec-fn
          ((fn [[r c _]] (try-opts-at sk r c (get-cell opts r c) random?))))))
 
 (defn -solve-sudoku [sk random?]
@@ -83,10 +84,34 @@
   ([sk random?] (solution-seq (-solve-sudoku sk random?))))
 
 (defn solvable? [sk] (-> sk (solve-sudoku) (first) nil? not))
+(defn uniq-solution? [sk]
+  (let [sols (solve-sudoku sk)
+        sol1 (first sols)
+        sol2 (second sols)]
+    (and (not (nil? sol1))
+         (nil? sol2)))
+  )
 
-;; (defn generate-sudoku []
-;;   d)
+(defn remove-random-element [sk]
+  (->> sk
+       (map-indexed-sudoku (fn [r c v] [r c v (rand)]))
+       (reduce concat)
+       (filter #(possible-val? (nth % 2)))
+       (sort-by #(nth % 3))
+       (map #(set-cell sk (nth % 0) (nth % 1) nil))
+       (filter uniq-solution?)
+       (first)))
 
+(defn remove-elements [sk max]
+  (loop [curr sk
+         left max]
+    (if (<= left 0)
+      curr
+      (let [next (remove-random-element curr)]
+        (println "Iteration\n" next "\n\n")
+        (if (nil? next)
+          curr
+          (recur next (- left 1)))))))
 
 (let [_ nil]
   (def sk-empty
@@ -165,6 +190,10 @@
      [_ _ _ _ 7 _ _ _ 2]
      [6 _ 8 _ _ 2 _ 5 _]
      [9 _ _ _ 4 _ 6 _ 8]]))
+
+(defn generate-random-sudoku []
+  (first (solve-sudoku sk-empty true)))
+
 
 ;; (defn debug [ob & args]
 ;;   (cond
