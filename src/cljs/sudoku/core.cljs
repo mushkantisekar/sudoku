@@ -30,6 +30,12 @@
   (fn []
     [:span.main
      [:h1 "Welcome to sudoku"]
+     [:h2 "Test items"]
+     [:ul
+      (for [i (range 100)]
+        [:li [:a {:href "foooo"} (str "Generated item number " i)]])]
+
+     [:h2 "Original items"]
      [:ul
       [:li [:a {:href (path-for :items)} "Items of sudoku"]]
       [:li [:a {:href "/broken/link"} "Broken link"]]]]))
