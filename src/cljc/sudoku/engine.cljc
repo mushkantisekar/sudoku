@@ -1,18 +1,8 @@
 (ns sudoku.engine
   (:require [clojure.set :as st]))
 
-
-(defn debug [ob & args]
-  (cond
-    (string? ob) (println "*DEBUG* " ob)
-
-    (fn? ob)
-    (do (println "*DEBUG* Call to '" ob "' with args '" args "'")
-        (let [ret (apply ob args)]
-          (println "*DEBUG* Returning '" ret "'")
-          ret))))
-
 (def possible-vals #{1 2 3 4 5 6 7 8 9})
+(declare debug)
 
 (defn possible-val? [n] (contains? possible-vals n))
 (defn map-sudoku [f sk] (vec (map #(vec (map f %)) sk)))
@@ -81,49 +71,35 @@
           orig
           (recur updt))))))
 
-(declare solve-sudoku)
+(declare -solve-sudoku)
+
+(defn filter-results [res-tree]
+  (filter vector? (tree-seq #(not (vector? %)) identity res-tree)))
 
 (defn try-opts-at [sk r c opts]
   (->> (lazy-seq opts)
        (map #(set-cell sk r c %))
-       (map solve-sudoku)
-       (reduce concat) ; every solve sudoku returns a list
+       (map -solve-sudoku)
        (filter #(not (or (empty? %) (nil? %))))))
 
 (defn solve-open-sudoku [sk]
   (let [opts (options sk)]
-    (->> opts
+    (->> (lazy-seq opts)
          (map-indexed-sudoku (fn [r c v] [r c (count v)])) ; Take only cells with
          (reduce concat)                                   ; multiple options
          (filter #(> (% 2) 1))                             ; available
          (first)
-         ;(map (fn [[r c _]] (try-opts-at sk r c (get-cell opts r c))))
-         ((fn [[r c _]] (try-opts-at sk r c (get-cell opts r c))))
-         (filter #(not (or (empty? %) (nil? %)))))))
+         ((fn [[r c _]] (try-opts-at sk r c (get-cell opts r c)))))))
 
-(defn solve-sudoku [sk]
+(defn -solve-sudoku [sk]
   (let [sk (complete-sudoku sk)]
     (if (solved? sk)
-        (list sk)
-        (solve-open-sudoku sk))))
+      (list sk)
+      (solve-open-sudoku sk))))
 
-;; (defn mod-swap-rows [sk block r1 r2]
-;;   (let [r1 (+ r1 (* 3 block))
-;;         r2 (+ r2 (* 3 block))]
-;;     (assoc sk r1 (sk r2) r2 (sk r1))))
+(defn solve-sudoku [sk]
+  (filter-results (-solve-sudoku sk)))
 
-;; (defn mod-swap-cols [sk block c1 c2]
-;;   (-> sk transpose (mod-swap-rows block c1 c2) transpose))
-
-;; (defn mod-swap-blocks-hor [sk b1 b2]
-
-;;   )
-
-;; (defn mod-swap-blocks-ver [sk b1 b2]
-;;   (when (or (< 0 b1) (> 2 b1)
-;;             (< 0 b2) (> 2 b2))
-;;     (throw (-> RuntimeException "0 <= b[1|2] <= 2")))
-;;   sk) ;; FIXME
 
 (let [_ nil]
   (def empty-sudoku (vec (for [i (range 9)] (vec (for [j (range 9)] nil)))))
@@ -171,3 +147,36 @@
      [_ _ 5 _ 7 _ _ _ 2]
      [6 _ 8 _ _ 2 _ 4 _]
      [9 _ _ _ 4 _ 6 _ 8]]))
+
+(defn debug [ob & args]
+  (cond
+    (string? ob) (println "*DEBUG* " ob)
+
+    (fn? ob)
+    (do (println "*DEBUG* Call to '" ob "' with args '" args "'")
+        (let [ret (apply ob args)]
+          (println "*DEBUG* Returning '" ret "'")
+          ret))))
+
+;; (defn mod-swap-rows [sk block r1 r2]
+;;   (let [r1 (+ r1 (* 3 block))
+;;         r2 (+ r2 (* 3 block))]
+;;     (assoc sk r1 (sk r2) r2 (sk r1))))
+
+;; (defn mod-swap-cols [sk block c1 c2]
+;;   (-> sk transpose (mod-swap-rows block c1 c2) transpose))
+
+;; (defn mod-swap-blocks-hor [sk b1 b2]
+
+;;   )
+
+;; (defn mod-swap-blocks-ver [sk b1 b2]
+;;   (when (or (< 0 b1) (> 2 b1)
+;;             (< 0 b2) (> 2 b2))
+;;     (throw (-> RuntimeException "0 <= b[1|2] <= 2")))
+;;   sk) ;; FIXME
+
+;; (defn lazy-map-indexed-sudoku [f sk]
+;;   (map-indexed (fn [r rv] (map-indexed
+;;                  (fn [c v] (f r c v)) rv))
+;;                sk))
