@@ -37,7 +37,7 @@
        (flatten)
        (reduce #(and %1 %2) true)
        not))
-
+ 
 (defn complete-sudoku-once [sk] ; Tries to fill in all cells whose content
   (let [sk-opts (options sk)]   ; can be deducted
     (map-indexed-sudoku

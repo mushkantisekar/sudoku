@@ -384,3 +384,52 @@
           [3 nil nil nil 7 nil nil nil 2]
           [6 nil 8 nil nil 2 nil 4 nil]
           [9 nil nil nil 4 nil 6 nil 8]])))
+
+(deftest test-solve-sudoku
+  (is (= (first (solve-sudoku sk-solved))
+         sk-solved))
+
+  (is (= (solve-sudoku sk-open-single-solution)
+         '([[1 2 3 4 5 6 7 8 9]
+           [4 5 6 7 8 9 1 2 3]
+           [7 8 9 1 2 3 4 5 6]
+           [2 3 4 5 6 7 8 9 1]
+           [5 6 7 8 9 1 2 3 4]
+           [8 9 1 2 3 4 5 6 7]
+           [3 4 5 6 7 8 9 1 2]
+           [6 7 8 9 1 2 3 4 5]
+           [9 1 2 3 4 5 6 7 8]])))
+
+  (is (= (solve-sudoku sk-directly-solvable)
+         '([[1 2 3 4 5 6 7 8 9]
+           [4 5 6 7 8 9 1 2 3]
+           [7 8 9 1 2 3 4 5 6]
+           [2 3 4 5 6 7 8 9 1]
+           [5 6 7 8 9 1 2 3 4]
+           [8 9 1 2 3 4 5 6 7]
+           [3 4 5 6 7 8 9 1 2]
+           [6 7 8 9 1 2 3 4 5]
+           [9 1 2 3 4 5 6 7 8]])))
+
+  (let [sols (into #{} (solve-sudoku sk-open-multiple-solutions))]
+    (is (= 42 (count sols)))
+    (is (contains? sols
+                   [[1 9 2 4 5 3 7 8 6]
+                    [4 5 6 7 8 9 1 2 3]
+                    [7 8 3 6 2 1 4 5 9]
+                    [2 3 4 5 6 7 8 9 1]
+                    [5 6 7 1 9 8 2 3 4]
+                    [8 1 9 2 3 4 5 6 7]
+                    [3 4 5 8 7 6 9 1 2]
+                    [6 7 8 9 1 2 3 4 5]
+                    [9 2 1 3 4 5 6 7 8]]))
+    (is (contains? sols
+                   [[1 9 2 4 5 3 7 8 6]
+                    [4 5 6 7 8 9 1 2 3]
+                    [7 8 3 6 2 1 4 5 9]
+                    [2 3 4 5 6 7 8 9 1]
+                    [5 6 7 9 1 8 2 3 4]
+                    [8 1 9 2 3 4 5 6 7]
+                    [3 4 5 8 7 6 9 1 2]
+                    [6 7 8 1 9 2 3 4 5]
+                    [9 2 1 3 4 5 6 7 8]]))))
