@@ -26,6 +26,9 @@
 ;; -------------------------
 ;; Page components
 
+(defn clickk [n]
+  (println "***DEBUG*** Clicked on link " n " !!!"))
+
 (defn home-page []
   (fn []
     [:span.main
@@ -33,7 +36,7 @@
      [:h2 "Test items"]
      [:ul
       (for [i (range 100)]
-        [:li [:a {:href "foooo"} (str "Generated item number " i)]])]
+        [:li  [:a {:href "#" :on-click #(clickk i)} (str "Generated item number " i)]])]
 
      [:h2 "Original items"]
      [:ul
