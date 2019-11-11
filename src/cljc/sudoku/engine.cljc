@@ -62,11 +62,21 @@
        (map #(set-value sk r c %))
        (map #(-solve-sudoku % random?))))
 
+(defn select-row-less-options [rows]
+  ;; #_(println "Call to select-row-less-options '" rows "'")
+  (if (empty? rows)
+    (first rows)
+    (reduce (fn [acc n]
+              (if (<= (get acc 2) (get n 2)) 
+                acc
+                n))
+            rows)))
+
 (defn- solve-open-sudoku [sk random?] ; Solves a sudoku without any determined
   (let [opts      (options sk)       ; Individual cell
-        selec-fn  (if random?
-                    (fn [coll] (if (empty? coll) nil (rand-nth coll)))
-                    first)]
+        selec-fn (if random?
+                   (fn [coll] (if (empty? coll) nil (rand-nth coll)))
+                   select-row-less-options)]
     (->> opts
          (map-indexed-sudoku (fn [r c v] [r c (count v)]))
          (reduce concat)

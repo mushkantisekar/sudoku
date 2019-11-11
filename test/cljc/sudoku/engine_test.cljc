@@ -433,3 +433,12 @@
                     [3 4 5 8 7 6 9 1 2]
                     [6 7 8 1 9 2 3 4 5]
                     [9 2 1 3 4 5 6 7 8]]))))
+
+
+(comment
+  (time (first (solve-sudoku sk-empty)))
+  ; -> 7.4 s (base)
+  ; -> 2.4 s (eliminate unneeded filter)
+  ; -> 0.8 s (chose cell with less options to pivot)
+
+  )
