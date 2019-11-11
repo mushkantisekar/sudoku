@@ -63,9 +63,8 @@
        (map #(-solve-sudoku % random?))))
 
 (defn select-row-less-options [rows]
-  ;; #_(println "Call to select-row-less-options '" rows "'")
   (if (empty? rows)
-    (first rows)
+    nil
     (reduce (fn [acc n]
               (if (<= (get acc 2) (get n 2)) 
                 acc
