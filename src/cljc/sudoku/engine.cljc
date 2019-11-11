@@ -21,8 +21,8 @@
 (defn options-cell [sk r c v]
   (let* [sk (set-value sk r c nil)
          vals (into #{} (set/union (row sk r)
-                                  (col sk c)
-                                  (sqr sk r c)))
+                                   (col sk c)
+                                   (sqr sk r c)))
          opts (set/difference possible-vals vals)]
     (if-not (possible-val? v) opts (if (contains? opts v) #{v} #{}))))
 
@@ -37,7 +37,7 @@
        (flatten)
        (reduce #(and %1 %2) true)
        not))
- 
+
 (defn complete-sudoku-once [sk] ; Tries to fill in all cells whose content
   (let [sk-opts (options sk)]   ; can be deducted
     (map-indexed-sudoku
@@ -58,10 +58,9 @@
   (filter vector? (tree-seq #(not (vector? %)) identity sol-tree)))  ; solutions
 
 (defn- try-opts-at [sk r c opts random?] ; Tries all options at row r and col c
-  (->> (lazy-seq opts)
+  (->> opts
        (map #(set-value sk r c %))
-       (map #(-solve-sudoku % random?))
-       (filter #(not (or (empty? %) (nil? %))))))
+       (map #(-solve-sudoku % random?))))
 
 (defn- solve-open-sudoku [sk random?] ; Solves a sudoku without any determined
   (let [opts      (options sk)       ; Individual cell
@@ -69,14 +68,14 @@
                     (fn [coll] (if (empty? coll) nil (rand-nth coll)))
                     first)]
     (->> opts
-         (map-indexed-sudoku (fn [r c v] [r c (count v)])) ; Take only cells with
-         (reduce concat)                                   ; multiple options
-         (filter #(> (% 2) 1))                             ; available
+         (map-indexed-sudoku (fn [r c v] [r c (count v)]))
+         (reduce concat)
+         (filter #(> (% 2) 1)) ; Take only cells with multiple options available
          selec-fn
          ((fn [[r c _]] (try-opts-at sk r c (get-value opts r c) random?))))))
 
-(defn- -solve-sudoku [sk random?] ; Finds all solutions to a sudoku. If random?
-  (let [sk (complete-sudoku sk)] ; is true 
+(defn- -solve-sudoku [sk random?]
+  (let [sk (complete-sudoku sk)]
     (if (solved? sk)
       (list sk)
       (solve-open-sudoku sk random?))))
@@ -102,8 +101,7 @@
         sol1 (first sols)
         sol2 (second sols)]
     (and (not (nil? sol1))
-         (nil? sol2)))
-  )
+         (nil? sol2))))
 
 (defn remove-random-element
   "Removes a random element from the sudoku while ensuring that the resulting
