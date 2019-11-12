@@ -1,5 +1,6 @@
 (ns sudoku.engine
-  (:require [clojure.set :as set]))
+  (:require [clojure.set :as set]
+            [ better-cond.core :as b]))
 
 (def possible-vals #{1 2 3 4 5 6 7 8 9})
 
@@ -41,28 +42,28 @@
 (defn complete-sudoku-once
   "Tries to fill in all cells whose content can be deducted"
   [sk]
-  (let [sk-opts (options sk)] ;; This is ugly as hell. Need to check
-    (map-indexed-sudoku       ;; whether to use "better-cond"
+  (let [sk-opts (options sk)]
+    (map-indexed-sudoku
      (fn [r c v]
-       (if (possible-val? v)
-         v
-         (let [opts-at-point       (into #{} (get-value sk-opts r c))]
-           (if (= 1 (count opts-at-point))
-             (first opts-at-point)
-             (let [tmp-opts            (set-value sk-opts r c #{})
+       (b/cond
+         (possible-val? v) v
+
+         :let [opts-at-point       (into #{} (get-value sk-opts r c))]
+         (= 1 (count opts-at-point)) (first opts-at-point)
+
+         :let [tmp-opts            (set-value sk-opts r c #{})
                    opts-row            (apply set/union (row tmp-opts r))
                    remaining-from-row  (set/difference opts-at-point opts-row)]
-               (if (= 1 (count remaining-from-row))
-                 (first remaining-from-row)
-                 (let [opts-col            (apply set/union (col tmp-opts c))
-                        remaining-from-col  (set/difference opts-at-point opts-col)]
-                   (if (= 1 (count remaining-from-col))
-                     (first remaining-from-col)
-                     (let [opts-sqr            (apply set/union (sqr tmp-opts r c))
-                            remaining-from-sqr  (set/difference opts-at-point opts-sqr)]
-                       (if (= 1 (count remaining-from-sqr))
-                         (first remaining-from-sqr)
-                         v))))))))))
+         (= 1 (count remaining-from-row)) (first remaining-from-row)
+
+         :let [opts-col            (apply set/union (col tmp-opts c))
+               remaining-from-col  (set/difference opts-at-point opts-col)]
+         (= 1 (count remaining-from-col)) (first remaining-from-col)
+
+         :let [opts-sqr            (apply set/union (sqr tmp-opts r c))
+               remaining-from-sqr  (set/difference opts-at-point opts-sqr)]
+         (= 1 (count remaining-from-sqr)) (first remaining-from-sqr)
+         v))
      sk)))
 
 (defn complete-sudoku [sk] ; Fills in all cells whose content can be deducted
