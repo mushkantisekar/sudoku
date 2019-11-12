@@ -19,11 +19,11 @@
     (vec (for [i (range 3) j (range 3)] (get-value sk (+ ir i) (+ ic j))))))
 
 (defn options-cell [sk r c v]
-  (let* [sk (set-value sk r c nil)
-         vals (into #{} (set/union (row sk r)
-                                   (col sk c)
-                                   (sqr sk r c)))
-         opts (set/difference possible-vals vals)]
+  (let [sk (set-value sk r c nil)
+        vals (into #{} (set/union (row sk r)
+                                  (col sk c)
+                                  (sqr sk r c)))
+        opts (set/difference possible-vals vals)]
     (if-not (possible-val? v) opts (if (contains? opts v) #{v} #{}))))
 
 (defn options [sk] (map-indexed-sudoku (fn [r c v] (options-cell sk r c v)) sk))
@@ -41,23 +41,28 @@
 (defn complete-sudoku-once
   "Tries to fill in all cells whose content can be deducted"
   [sk]
-  (let* [sk-opts (options sk)]
-    (map-indexed-sudoku
+  (let [sk-opts (options sk)] ;; This is ugly as hell. Need to check
+    (map-indexed-sudoku       ;; whether to use "better-cond"
      (fn [r c v]
-         (let* [opts-at-point       (into #{} (get-value sk-opts r c))
-                tmp-opts            (set-value sk-opts r c #{})
-                opts-row            (apply set/union (row tmp-opts r))
-                remaining-from-row  (set/difference opts-at-point opts-row)
-                opts-col            (apply set/union (col tmp-opts c))
-                remaining-from-col  (set/difference opts-at-point opts-col)
-                opts-sqr            (apply set/union (sqr tmp-opts r c))
-                remaining-from-sqr  (set/difference opts-at-point opts-sqr)]
-           (cond
-             (= 1 (count opts-at-point))      (first opts-at-point)
-             (= 1 (count remaining-from-row)) (first remaining-from-row)
-             (= 1 (count remaining-from-col)) (first remaining-from-col)
-             (= 1 (count remaining-from-sqr)) (first remaining-from-sqr)
-             :else v)))
+       (if (possible-val? v)
+         v
+         (let [opts-at-point       (into #{} (get-value sk-opts r c))]
+           (if (= 1 (count opts-at-point))
+             (first opts-at-point)
+             (let [tmp-opts            (set-value sk-opts r c #{})
+                   opts-row            (apply set/union (row tmp-opts r))
+                   remaining-from-row  (set/difference opts-at-point opts-row)]
+               (if (= 1 (count remaining-from-row))
+                 (first remaining-from-row)
+                 (let [opts-col            (apply set/union (col tmp-opts c))
+                        remaining-from-col  (set/difference opts-at-point opts-col)]
+                   (if (= 1 (count remaining-from-col))
+                     (first remaining-from-col)
+                     (let [opts-sqr            (apply set/union (sqr tmp-opts r c))
+                            remaining-from-sqr  (set/difference opts-at-point opts-sqr)]
+                       (if (= 1 (count remaining-from-sqr))
+                         (first remaining-from-sqr)
+                         v))))))))))
      sk)))
 
 (defn complete-sudoku [sk] ; Fills in all cells whose content can be deducted
@@ -138,7 +143,7 @@
        (map-indexed-sudoku (fn [r c v] [r c v (rand)]))
        (reduce concat)
        (filter #(possible-val? (nth % 2)))
-       (sort-by #(nth % 3))
+       ;; (sort-by #(nth % 3))
        (map #(set-value sk (nth % 0) (nth % 1) nil))
        (filter uniq-solution?)
        (first)))

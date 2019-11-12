@@ -441,5 +441,6 @@
   ; -> 7.4 s (base)
   ; -> 2.4 s (eliminate unneeded filter)
   ; -> 0.8 s (chose cell with less options to pivot)
+  ; -> 1.3 s (more advance algorithm with intelligent deductions)
 
   )
