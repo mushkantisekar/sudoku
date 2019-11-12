@@ -48,22 +48,23 @@
        (b/cond
          (possible-val? v) v
 
-         :let [opts-at-point       (into #{} (get-value sk-opts r c))]
+         :let [opts-at-point         (into #{} (get-value sk-opts r c))]
          (= 1 (count opts-at-point)) (first opts-at-point)
 
-         :let [tmp-opts            (set-value sk-opts r c #{})
-                   opts-row            (apply set/union (row tmp-opts r))
-                   remaining-from-row  (set/difference opts-at-point opts-row)]
+         :let [tmp-opts               (set-value sk-opts r c #{})
+                   opts-row           (apply set/union (row tmp-opts r))
+                   remaining-from-row (set/difference opts-at-point opts-row)]
          (= 1 (count remaining-from-row)) (first remaining-from-row)
 
-         :let [opts-col            (apply set/union (col tmp-opts c))
-               remaining-from-col  (set/difference opts-at-point opts-col)]
+         :let [opts-col           (apply set/union (col tmp-opts c))
+               remaining-from-col (set/difference opts-at-point opts-col)]
          (= 1 (count remaining-from-col)) (first remaining-from-col)
 
-         :let [opts-sqr            (apply set/union (sqr tmp-opts r c))
-               remaining-from-sqr  (set/difference opts-at-point opts-sqr)]
+         :let [opts-sqr           (apply set/union (sqr tmp-opts r c))
+               remaining-from-sqr (set/difference opts-at-point opts-sqr)]
          (= 1 (count remaining-from-sqr)) (first remaining-from-sqr)
-         v))
+
+         :else v))
      sk)))
 
 (defn complete-sudoku [sk] ; Fills in all cells whose content can be deducted
@@ -93,7 +94,7 @@
             rows)))
 
 (defn- solve-open-sudoku [sk random?] ; Solves a sudoku without any determined
-  (let [opts      (options sk)       ; Individual cell
+  (let [opts     (options sk)        ; Individual cell
         selec-fn (if random?
                    (fn [coll] (if (empty? coll) nil (rand-nth coll)))
                    select-row-less-options)]
