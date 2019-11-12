@@ -38,11 +38,26 @@
        (reduce #(and %1 %2) true)
        not))
 
-(defn complete-sudoku-once [sk] ; Tries to fill in all cells whose content
-  (let [sk-opts (options sk)]   ; can be deducted
+(defn complete-sudoku-once
+  "Tries to fill in all cells whose content can be deducted"
+  [sk]
+  (let* [sk-opts (options sk)]
     (map-indexed-sudoku
-     (fn [r c v] (let [cell-opts (get-value sk-opts r c)]
-                   (if (= 1 (count cell-opts)) (first cell-opts) v)))
+     (fn [r c v]
+         (let* [opts-at-point       (into #{} (get-value sk-opts r c))
+                tmp-opts            (set-value sk-opts r c #{})
+                opts-row            (apply set/union (row tmp-opts r))
+                remaining-from-row  (set/difference opts-at-point opts-row)
+                opts-col            (apply set/union (col tmp-opts c))
+                remaining-from-col  (set/difference opts-at-point opts-col)
+                opts-sqr            (apply set/union (sqr tmp-opts r c))
+                remaining-from-sqr  (set/difference opts-at-point opts-sqr)]
+           (cond
+             (= 1 (count opts-at-point))      (first opts-at-point)
+             (= 1 (count remaining-from-row)) (first remaining-from-row)
+             (= 1 (count remaining-from-col)) (first remaining-from-col)
+             (= 1 (count remaining-from-sqr)) (first remaining-from-sqr)
+             :else v)))
      sk)))
 
 (defn complete-sudoku [sk] ; Fills in all cells whose content can be deducted
@@ -66,7 +81,7 @@
   (if (empty? rows)
     nil
     (reduce (fn [acc n]
-              (if (<= (get acc 2) (get n 2)) 
+              (if (<= (get acc 2) (get n 2))
                 acc
                 n))
             rows)))

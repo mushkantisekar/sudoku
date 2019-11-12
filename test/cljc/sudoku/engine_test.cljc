@@ -316,38 +316,39 @@
 (deftest test-complete-sudoku-once
   (is (= (complete-sudoku-once sk-empty) sk-empty))
 
-  (is (= (complete-sudoku-once sk-directly-solvable)
-         [[1 nil 3 4 5 6 7 nil 9]
+  (is (= [[1 nil 3 4 5 6 7 8 9]
           [4 nil 6 nil 8 nil nil nil 3]
-          [7 8 9 nil 2 3 nil 5 nil]
-          [2 nil 4 nil nil 7 nil nil nil]
-          [5 nil 7 nil 9 nil nil 3 nil]
-          [8 nil 1 2 nil 4 nil 6 nil]
-          [3 nil 5 nil 7 nil nil nil 2]
+          [7 8 9 nil 2 3 nil 5 6]
+          [2 nil 4 nil 6 7 nil nil nil]
+          [5 nil 7 nil 9 nil 2 3 nil]
+          [8 nil 1 2 nil 4 nil 6 7]
+          [3 4 5 6 7 nil nil nil 2]
           [6 nil 8 nil nil 2 nil 4 nil]
-          [9 nil 2 nil 4 nil 6 nil 8]]))
+          [9 nil 2 nil 4 nil 6 7 8]]
+         (complete-sudoku-once sk-directly-solvable)))
 
-  (is (= (complete-sudoku-once sk-open-single-solution)
-         [[1 nil nil 4 nil 6 7 nil 9]
-          [4 nil 6 nil 8 nil nil nil 3]
-          [nil 8 nil nil 2 nil nil 5 nil]
-          [2 nil 4 nil nil 7 nil nil nil]
-          [5 nil 7 nil 9 nil nil 3 nil]
-          [8 nil nil 2 nil 4 nil 6 nil]
-          [nil nil nil nil 7 nil nil nil 2]
-          [6 nil 8 nil nil 2 nil 4 nil]
-          [9 nil nil nil 4 nil 6 nil 8]]))
 
-  (is (= (complete-sudoku-once sk-open-multiple-solutions)
-         [[1 nil nil 4 nil nil 7 nil nil]
+  (is (= [[1 nil nil 4 nil 6 7 8 9]
           [4 nil 6 nil 8 nil nil nil 3]
-          [nil 8 nil nil 2 nil nil 5 nil]
-          [2 nil 4 nil nil 7 nil nil nil]
-          [5 nil 7 nil nil nil nil 3 nil]
-          [8 nil nil 2 nil 4 nil 6 nil]
-          [nil nil nil nil 7 nil nil nil 2]
+          [7 8 nil nil 2 nil nil 5 6]
+          [2 nil 4 nil 6 7 nil nil nil]
+          [5 nil 7 nil 9 nil 2 3 nil]
+          [8 nil nil 2 nil 4 nil 6 7]
+          [nil 4 nil 6 7 nil nil nil 2]
           [6 nil 8 nil nil 2 nil 4 nil]
-          [9 nil nil nil 4 nil 6 nil 8]])))
+          [9 nil nil nil 4 nil 6 7 8]]
+         (complete-sudoku-once sk-open-single-solution)))
+
+  (is (= [[1 nil nil 4 nil nil 7 8 nil]
+          [4 nil 6 nil 8 nil nil nil 3]
+          [7 8 nil nil 2 nil nil 5 nil]
+          [2 nil 4 nil nil 7 nil nil nil]
+          [5 nil 7 nil nil nil 2 3 nil]
+          [8 nil nil 2 nil 4 nil 6 7]
+          [nil 4 nil nil 7 nil nil nil 2]
+          [6 nil 8 nil nil 2 nil 4 nil]
+          [9 nil nil nil 4 nil 6 7 8]]
+         (complete-sudoku-once sk-open-multiple-solutions))))
 
 (deftest test-complete-sudoku
   (is (= (complete-sudoku sk-empty) sk-empty))
@@ -363,27 +364,27 @@
           [6 7 8 9 1 2 3 4 5]
           [9 1 2 3 4 5 6 7 8]]))
 
-  (is (= (complete-sudoku sk-open-single-solution)
-         [[1 nil nil 4 nil 6 7 nil 9]
-          [4 nil 6 nil 8 nil nil nil 3]
-          [7 8 nil nil 2 nil nil 5 nil]
-          [2 nil 4 nil nil 7 nil nil nil]
-          [5 nil 7 nil 9 nil nil 3 nil]
-          [8 nil nil 2 nil 4 nil 6 nil]
-          [3 nil nil nil 7 nil nil nil 2]
-          [6 nil 8 nil nil 2 nil 4 nil]
-          [9 nil nil nil 4 nil 6 nil 8]]))
+  (is (= [[1 2 3 4 5 6 7 8 9]
+          [4 5 6 7 8 9 1 2 3]
+          [7 8 9 1 2 3 4 5 6]
+          [2 3 4 5 6 7 8 9 1]
+          [5 6 7 8 9 1 2 3 4]
+          [8 9 1 2 3 4 5 6 7]
+          [3 4 5 6 7 8 9 1 2]
+          [6 7 8 9 1 2 3 4 5]
+          [9 1 2 3 4 5 6 7 8]]
+         (complete-sudoku sk-open-single-solution)))
 
-  (is (= (complete-sudoku sk-open-multiple-solutions)
-         [[1 nil nil 4 nil nil 7 nil nil]
-          [4 nil 6 nil 8 nil nil nil 3]
-          [7 8 nil nil 2 nil nil 5 nil]
-          [2 nil 4 nil nil 7 nil nil nil]
-          [5 nil 7 nil nil nil nil 3 nil]
-          [8 nil nil 2 nil 4 nil 6 nil]
-          [3 nil nil nil 7 nil nil nil 2]
-          [6 nil 8 nil nil 2 nil 4 nil]
-          [9 nil nil nil 4 nil 6 nil 8]])))
+  (is (= [[1 nil nil 4 nil nil 7 8 nil]
+          [4 nil 6 7 8 nil nil 2 3]
+          [7 8 nil nil 2 nil 4 5 nil]
+          [2 nil 4 nil nil 7 8 nil nil]
+          [5 nil 7 nil nil nil 2 3 4]
+          [8 nil nil 2 nil 4 nil 6 7]
+          [3 4 nil nil 7 nil nil nil 2]
+          [6 7 8 nil nil 2 3 4 nil]
+          [9 nil nil nil 4 nil 6 7 8]]
+         (complete-sudoku sk-open-multiple-solutions))))
 
 (deftest test-solve-sudoku
   (is (= (first (solve-sudoku sk-solved))
