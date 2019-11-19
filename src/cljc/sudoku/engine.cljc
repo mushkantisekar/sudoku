@@ -68,20 +68,29 @@
      sk)))
 
 (defn complete-sudoku [sk] ; Fills in all cells whose content can be deducted
-  (if (invalid? sk)
-    nil
-    (loop [orig sk]
-      (let [updt (complete-sudoku-once orig)]
-        (if (= orig updt) orig (recur updt))))))
+  (cond
+    (invalid? sk) nil
+    ;; (solved? sk) sk
+    :else
+    (let [ret (loop [orig sk]
+                (let [updt (complete-sudoku-once orig)]
+                  (if (= orig updt) orig (recur updt))))]
+      (-apend-meta-ancestors sk ret))))
 
 (declare -solve-sudoku)
 
 (defn- solution-seq [sol-tree] ; Converts the solution tree in a lazy sequence of
   (filter vector? (tree-seq #(not (vector? %)) identity sol-tree)))  ; solutions
 
+(defn- -apend-meta-ancestors [sk-orig sk-branch]
+  (let [ans (:ancestors (meta sk-orig))]
+    (with-meta sk-branch {:ancestors (cons sk-branch ans)})))
+
 (defn- try-opts-at [sk r c opts random?] ; Tries all options at row r and col c
   (->> opts
        (map #(set-value sk r c %))
+       (map #(-apend-meta-ancestors sk %))
+       ;; (map #(with-meta % {:ancestors (cons sk (:ancestors (meta %)))}))
        (map #(-solve-sudoku % random?))))
 
 (defn select-row-less-options [rows]
@@ -106,10 +115,11 @@
          ((fn [[r c _]] (try-opts-at sk r c (get-value opts r c) random?))))))
 
 (defn- -solve-sudoku [sk random?]
-  (let [sk (complete-sudoku sk)]
-    (if (solved? sk)
-      (list sk)
-      (solve-open-sudoku sk random?))))
+  (let [sk- (complete-sudoku sk)]
+    (if (solved? sk-)
+      (when-not (nil? sk-)
+        (list (-apend-meta-ancestors sk sk-)))
+      (solve-open-sudoku sk- random?))))
 
 (defn solve-sudoku
   "Finds all the solutions to a given solutions, returning them as a lazy seq.
