@@ -99,7 +99,7 @@
 
 (declare new-game)
 (defn finished? [board] (= 0 (it-> (:tiles board) (filter nil? it) (count it))))
-(defn- finish-game [board]
+(defn- finish-game []
   (println "Game finished: another one (Y/N)")
   (let [command (read-line)]
     (when (or (= "Y" (first command)) (= "y" (first command)))
@@ -129,5 +129,5 @@
               (= \l cmd) (move-board :right board)
               (= \j cmd) (move-board :down board)
               (= \k cmd) (move-board :up board))]
-      (= next-board board) (recur board true)
-      :else                (recur board false))))
+      (= next-board board) (recur board false)
+      :else                (recur board true))))
